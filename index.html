@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BUY 100X CRYPTO HERE</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.5.2/web3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider/dist/umd/index.min.js"></script>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .border-container {
+      border: 10px solid #00faff;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 40px #00faff;
+      max-width: 600px;
+      width: 90%;
+    }
+    .pay-button, .connect-button {
+      background-color: #f39c12;
+      padding: 15px 40px;
+      font-size: 1.2em;
+      border: none;
+      color: white;
+      cursor: pointer;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+    .pay-button:hover, .connect-button:hover {
+      background-color: #e67e22;
+    }
+  </style>
+</head>
+<body>
+  <div class="border-container">
+    <h1>BUY 100X CRYPTO HERE</h1>
+    <button class="connect-button" id="connectButton">Connect Wallet</button>
+    <p id="walletAddress">Wallet Address: Not Connected</p>
+    <select id="paymentAmount">
+<option value="0.01">0.01 USDC</option>
+          <option value="1">1 USDC</option>
+          <option value="5">5 USDC</option>
+          <option value="10">10 USDC</option>
+          <option value="50">50 USDC</option>
+          <option value="100">100 USDC</option>
+          <option value="500">500 USDC</option>
+          <option value="1000">1,000 USDC</option>
+          <option value="5000">5,000 USDC</option>
+          <option value="10000">10,000 USDC</option>
+          <option value="50000">50,000 USDC</option>
+          <option value="100000">100,000 USDC</option>
+    </select>
+    <button class="pay-button" id="payButton">Pay Now with MetaMask</button>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    let web3;
+    let accounts;
+
+    async function connectWallet() {
+      if (typeof window.ethereum !== 'undefined') {
+        web3 = new Web3(window.ethereum);
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        accounts = await web3.eth.getAccounts();
+        document.getElementById('walletAddress').innerText = `Wallet Address: ${accounts[0]}`;
+      } else {
+        window.location.href = 'https://metamask.app.link/dapp/fclmail.github.io/100xmetamaskpay/';
+      }
+    }
+
+    document.getElementById('connectButton').onclick = connectWallet;
+
+    document.getElementById('payButton').onclick = async function() {
+      if (!accounts || accounts.length === 0) {
+        document.getElementById('status').innerText = 'Please connect your wallet first.';
+        return;
+      }
+      const paymentAmount = document.getElementById('paymentAmount').value;
+      const usdcAddress = '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359';
+      const recipientAddress = '0x7114a16E0a396b0B40ee139e8c14FDd3335348eA';
+      const amountInTokens = web3.utils.toBN(paymentAmount * Math.pow(10, 6));
+
+      const usdcABI = [{
+        "constant": false,
+        "inputs": [
+          { "name": "_to", "type": "address" },
+          { "name": "_value", "type": "uint256" }
+        ],
+        "name": "transfer",
+        "outputs": [{ "name": "", "type": "bool" }],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }];
+
+      const usdcContract = new web3.eth.Contract(usdcABI, usdcAddress);
+
+      try {
+        const txHash = await usdcContract.methods.transfer(recipientAddress, amountInTokens).send({
+          from: accounts[0]
+        });
+        document.getElementById('status').innerText = `Transaction successful! Tx Hash: ${txHash.transactionHash}`;
+      } catch (error) {
+        document.getElementById('status').innerText = `Transaction failed: ${error.message}`;
+      }
+    };
+  </script>
+</body>
+</html>
